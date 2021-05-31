@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgres
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-q', '-d', 'taskrun', '-U', 'superuser']
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./config/db/db-init.sh:/docker-entrypoint-initdb.d/db-init.sh
+      - ../_data/postgresql:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_USER: superuser
+      POSTGRES_PASSWORD: superpassword
+      POSTGRES_DB: taskrun
+    networks:
+      - postgres-network
+
+  # diagnosisdoc-api:
+  #   image: node:12
+  #   working_dir: /app
+  #   container_name: diagnosisdoc-api
+  #   restart: unless-stopped
+  #   command: 'npm run start:prod'
+  #   ports:
+  #     - 3000:3000
+  #     - 9229:9229
+  #   tty: true
+  #   volumes:
+  #     - .:/app
+  #   depends_on:
+  #     - mongo-diagnosisdoc
+  #   environment:
+  #     - NODE_ENV=production
+  # - DB_PASSWORD: 'password'
+  # - DB_USER: 'app'
+  # - DB_NAME: 'db'
+  # - DB_HOST: 'postgres'
+  # - PORT: 8080
+
+networks:
+  postgres-network:
+    driver: bridge
