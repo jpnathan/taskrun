@@ -19,11 +19,18 @@ app.use(auth(), authMiddlerware, tasks(), users());
 if (require.main === module) {
 	app.listen(process.env.PORT, async () => {
 		const databaseConnection = await database.sync();
-		const connection = await rabbitMQ.connect();
-		const channel = await rabbitMQ.createChannel(connection);
-		const queueData = await rabbitMQ.createQueue(channel, 'notifyManager');
-		global.queueData = queueData;
-		consumer.consumeMessageFromQueue(queueData);
+
+		setTimeout(async () => {
+			const connection = await rabbitMQ.connect();
+			const channel = await rabbitMQ.createChannel(connection);
+			const queueData = await rabbitMQ.createQueue(channel, 'notifyManager');
+			global.queueData = queueData;
+			consumer.consumeMessageFromQueue(queueData);
+
+			if (queueData) {
+				console.log('RabbitMQ is connected');
+			}
+		}, 15000);
 
 		if (databaseConnection) {
 			console.log('Database is connected');

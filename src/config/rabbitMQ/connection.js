@@ -4,7 +4,7 @@ const amqp = require('amqplib');
 
 const connectionString = {
 	protocol: 'amqp',
-	hostname: 'localhost',
+	hostname: 'rabbitmq',
 	username: 'guest',
 	password: 'guest'
 };

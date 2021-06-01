@@ -1,14 +1,18 @@
 version: '3'
 
 services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - default
+
   postgres:
     container_name: postgres
     image: postgres
-    healthcheck:
-      test: ['CMD', 'pg_isready', '-q', '-d', 'taskrun', '-U', 'superuser']
-      timeout: 45s
-      interval: 10s
-      retries: 10
     ports:
       - '5432:5432'
     volumes:
@@ -20,30 +24,27 @@ services:
       POSTGRES_PASSWORD: superpassword
       POSTGRES_DB: taskrun
     networks:
-      - postgres-network
+      - default
 
-  # diagnosisdoc-api:
-  #   image: node:12
-  #   working_dir: /app
-  #   container_name: diagnosisdoc-api
-  #   restart: unless-stopped
-  #   command: 'npm run start:prod'
-  #   ports:
-  #     - 3000:3000
-  #     - 9229:9229
-  #   tty: true
-  #   volumes:
-  #     - .:/app
-  #   depends_on:
-  #     - mongo-diagnosisdoc
-  #   environment:
-  #     - NODE_ENV=production
-  # - DB_PASSWORD: 'password'
-  # - DB_USER: 'app'
-  # - DB_NAME: 'db'
-  # - DB_HOST: 'postgres'
-  # - PORT: 8080
+  taskrun:
+    image: node:14
+    container_name: taskrun
+    command: 'npm run start'
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+    ports:
+      - 3000:3000
+      - 9229:9229
+    depends_on:
+      - postgres
+      - rabbitmq
+    # command: ["./wait-for-it.sh", "rabbitmq:5672"]
+    networks:
+      - default
 
 networks:
-  postgres-network:
+  default:
     driver: bridge
