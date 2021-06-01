@@ -32,6 +32,12 @@ then:
 npm test
 ```
 
+## Points to improve
+- Add unit tests
+- Add retry mechanism to conect to DB and RabbitMQ
+- Better error handling
+- Separete RabbitMQ in another service
+
 ## Author
 
 jpnathan
